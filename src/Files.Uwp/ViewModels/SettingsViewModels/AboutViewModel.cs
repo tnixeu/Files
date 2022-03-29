@@ -18,6 +18,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Xaml.Controls;
+using Windows.Services.Store;
 
 namespace Files.ViewModels.SettingsViewModels
 {
@@ -30,6 +31,9 @@ namespace Files.ViewModels.SettingsViewModels
         public ICommand OpenLogLocationCommand { get; }
         public ICommand CopyVersionInfoCommand { get; }
 
+        public ICommand JoinFlightGroupCommand { get; }
+        public ICommand LeaveFlightGroupCommand { get; }
+
         public ICommand ExportSettingsCommand { get; }
         public ICommand ImportSettingsCommand { get; }
 
@@ -40,10 +44,53 @@ namespace Files.ViewModels.SettingsViewModels
             OpenLogLocationCommand = new AsyncRelayCommand(OpenLogLocation);
             CopyVersionInfoCommand = new RelayCommand(CopyVersionInfo);
 
+            JoinFlightGroupCommand = new RelayCommand(JoinFlightGroup);
+            LeaveFlightGroupCommand = new RelayCommand(LeaveFlightGroup);
+
             ExportSettingsCommand = new AsyncRelayCommand(ExportSettings);
             ImportSettingsCommand = new AsyncRelayCommand(ImportSettings);
 
             ClickAboutFeedbackItemCommand = new AsyncRelayCommand<ItemClickEventArgs>(ClickAboutFeedbackItem);
+        }
+
+
+        public async Task<bool> AddUserToFlightGroup()
+        {
+            StoreSendRequestResult result = await StoreRequestHelper.SendRequestAsync(
+                StoreContext.GetDefault(), 8,
+                "{ \"type\": \"AddToFlightGroup\", \"parameters\": { \"flightGroupId\": \"1152921504607280743\" } }");
+
+            if (result.ExtendedError == null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async void JoinFlightGroup()
+        {
+            await AddUserToFlightGroup();
+        }
+
+
+        public async Task<bool> RemoveUserFromFlightGroup()
+        {
+            StoreSendRequestResult result = await StoreRequestHelper.SendRequestAsync(
+                StoreContext.GetDefault(), 8,
+                "{ \"type\": \"RemoveFromFlightGroup\", \"parameters\": { \"flightGroupId\": \"1152921504607280743\" } }");
+
+            if (result.ExtendedError == null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async void LeaveFlightGroup()
+        {
+            await RemoveUserFromFlightGroup();
         }
 
         private async Task ExportSettings()
