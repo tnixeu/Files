@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Files.Backend.Enums;
 using Files.Shared;
 using Files.Shared.Enums;
 using Files.Uwp.DataModels.NavigationControlItems;
@@ -16,7 +17,7 @@ using Windows.Devices.Enumeration;
 using Windows.Devices.Portable;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
-using DriveType = Files.Uwp.DataModels.NavigationControlItems.DriveType;
+using DriveType = Files.Backend.DataModels.NavigationControlItems.DriveType;
 using IO = System.IO;
 
 namespace Files.Uwp.Filesystem

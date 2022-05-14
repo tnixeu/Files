@@ -11,7 +11,6 @@ using Files.Uwp.Filesystem.StorageEnumerators;
 using Files.Uwp.Filesystem.StorageItems;
 using Files.Uwp.Helpers;
 using Files.Uwp.Helpers.FileListCache;
-using Files.Shared;
 using Files.Shared.Enums;
 using Files.Shared.EventArguments;
 using Files.Shared.Extensions;
@@ -45,6 +44,8 @@ using Windows.System;
 using static Files.Uwp.Helpers.NativeDirectoryChangesHelper;
 using static Files.Uwp.Helpers.NativeFindStorageItemHelper;
 using FileAttributes = System.IO.FileAttributes;
+using Files.Shared.Models.Shell;
+using Files.Backend.Helpers;
 
 namespace Files.Uwp.ViewModels
 {
@@ -574,9 +575,9 @@ namespace Files.Uwp.ViewModels
                 {
                     var key = FilesAndFolders.ItemGroupKeySelector?.Invoke(item);
                     var group = FilesAndFolders.GroupedCollection?.FirstOrDefault(x => x.Model.Key == key);
-                    if (group != null)
+                    if (group is GroupedCollection<ListedItem> grc)
                     {
-                        group.OrderOne(list => SortingHelper.OrderFileList(list, folderSettings.DirectorySortOption, folderSettings.DirectorySortDirection), item);
+                        grc.OrderOne(list => SortingHelper.OrderFileList(list, folderSettings.DirectorySortOption, folderSettings.DirectorySortDirection), item);
                     }
                 }
                 UpdateEmptyTextType();
@@ -754,7 +755,7 @@ namespace Files.Uwp.ViewModels
 
         private void OrderGroups(CancellationToken token = default)
         {
-            var gps = FilesAndFolders.GroupedCollection?.Where(x => !x.IsSorted);
+            var gps = FilesAndFolders.GroupedCollection.Cast<GroupedCollection<ListedItem>>()?.Where(x => !x.IsSorted);
             if (gps is null)
             {
                 return;
@@ -840,7 +841,10 @@ namespace Files.Uwp.ViewModels
                         var img = await GetItemTypeGroupIcon(gp.FirstOrDefault());
                         await dispatcherQueue.EnqueueAsync(() =>
                         {
-                            gp.Model.ImageSource = img;
+                            if (gp.Model is GroupedHeaderViewModel ghvm)
+                            {
+                                ghvm.ImageSource = img;
+                            }
                         }, DispatcherQueuePriority.Low);
                     }
                 });
@@ -851,8 +855,8 @@ namespace Files.Uwp.ViewModels
         {
             FilesAndFolders.ItemGroupKeySelector = GroupingHelper.GetItemGroupKeySelector(folderSettings.DirectoryGroupOption);
             var groupInfoSelector = GroupingHelper.GetGroupInfoSelector(folderSettings.DirectoryGroupOption);
-            FilesAndFolders.GetGroupHeaderInfo = groupInfoSelector.Item1;
-            FilesAndFolders.GetExtendedGroupHeaderInfo = groupInfoSelector.Item2;
+            FilesAndFolders.GetGroupHeaderInfo = (Action<Backend.Models.IGroupedCollection<ListedItem>>)groupInfoSelector.Item1;
+            FilesAndFolders.GetExtendedGroupHeaderInfo = (Action<Backend.Models.IGroupedCollection<ListedItem>>)groupInfoSelector.Item2;
         }
 
         public Dictionary<string, BitmapImage> DefaultIcons = new Dictionary<string, BitmapImage>();
@@ -1045,7 +1049,7 @@ namespace Files.Uwp.ViewModels
                         BaseStorageFile matchingStorageFile = null;
                         if (item.Key != null && FilesAndFolders.IsGrouped && FilesAndFolders.GetExtendedGroupHeaderInfo != null)
                         {
-                            gp = FilesAndFolders.GroupedCollection.Where(x => x.Model.Key == item.Key).FirstOrDefault();
+                            gp = FilesAndFolders.GroupedCollection.Cast<GroupedCollection<ListedItem>>().Where(x => x.Model.Key == item.Key).FirstOrDefault();
                             loadGroupHeaderInfo = !(gp is null) && !gp.Model.Initialized && !(gp.GetExtendedGroupHeaderInfo is null);
                         }
 
@@ -1163,7 +1167,10 @@ namespace Files.Uwp.ViewModels
                             await SafetyExtensions.IgnoreExceptions(
                                 () => dispatcherQueue.EnqueueAsync(() =>
                             {
-                                gp.Model.ImageSource = groupImage;
+                                if (gp.Model is GroupedHeaderViewModel ghvm)
+                                {
+                                    ghvm.ImageSource = groupImage;
+                                }
                                 gp.InitializeExtendedGroupHeaderInfoAsync();
                             }));
                         }
@@ -1518,7 +1525,7 @@ namespace Files.Uwp.ViewModels
             // Flag to use FindFirstFileExFromApp or StorageFolder enumeration
             var isBoxFolder = App.CloudDrivesManager.Drives.FirstOrDefault(x => x.Text == "Box")?.Path?.TrimEnd('\\') is string boxFolder ?
                 path.StartsWith(boxFolder) : false; // Use storage folder for Box Drive (#4629)
-            var isNetworkFolder = App.DrivesManager.Drives.Any(x => x.Path == Path.GetPathRoot(path) && x.Type == DataModels.NavigationControlItems.DriveType.Network)
+            var isNetworkFolder = App.DrivesManager.Drives.Any(x => x.Path == Path.GetPathRoot(path) && x.Type == Backend.DataModels.NavigationControlItems.DriveType.Network)
                 || System.Text.RegularExpressions.Regex.IsMatch(path, @"^\\\\(?!\?)"); // Use storage folder for network drives (*FromApp methods return access denied)
             bool enumFromStorageFolder = isBoxFolder || isNetworkFolder;
 

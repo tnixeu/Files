@@ -1,4 +1,5 @@
-﻿using Files.Shared;
+﻿using Files.Backend.Enums;
+using Files.Shared.Models.Shell;
 using Files.Uwp.Helpers;
 using Microsoft.Toolkit.Uwp;
 using System;
@@ -143,6 +144,6 @@ namespace Files.Uwp.Filesystem
             return (true, string.Empty);
         }
 
-        public void Dispose() {}
+        public void Dispose() { }
     }
 }

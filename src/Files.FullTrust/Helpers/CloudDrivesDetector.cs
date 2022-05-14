@@ -1,5 +1,6 @@
-using Files.Shared;
+using Files.Shared.Enums;
 using Files.Shared.Extensions;
+using Files.Shared.Models;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -96,7 +97,7 @@ namespace Files.FullTrust.Helpers
                         {
                             CloudProviders.Mega => $"MEGA ({Path.GetFileName(syncedFolder.TrimEnd('\\'))})",
                             CloudProviders.AmazonDrive => $"Amazon Drive",
-                            CloudProviders.Nextcloud => $"{ (!string.IsNullOrEmpty((string)namespaceKey?.GetValue("")) ? (string)namespaceKey?.GetValue(""):"Nextcloud")}",
+                            CloudProviders.Nextcloud => $"{(!string.IsNullOrEmpty((string)namespaceKey?.GetValue("")) ? (string)namespaceKey?.GetValue("") : "Nextcloud")}",
                             CloudProviders.Jottacloud => $"Jottacloud",
                             _ => null
                         },

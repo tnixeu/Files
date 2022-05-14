@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Uwp.Extensions;
+﻿using Files.Uwp.Extensions;
 using Files.Uwp.Filesystem.StorageItems;
 using Files.Uwp.Helpers;
 using Files.Uwp.Helpers.FileListCache;
@@ -19,6 +18,7 @@ using Windows.Storage;
 using Windows.UI.Xaml.Media.Imaging;
 using static Files.Uwp.Helpers.NativeFindStorageItemHelper;
 using FileAttributes = System.IO.FileAttributes;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Filesystem.StorageEnumerators
 {

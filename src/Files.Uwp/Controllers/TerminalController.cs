@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Search;
+using Files.Backend.Controllers;
 
 namespace Files.Uwp.Controllers
 {

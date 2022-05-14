@@ -1,4 +1,6 @@
-﻿using Files.Uwp.DataModels.NavigationControlItems;
+﻿using Files.Backend.DataModels.NavigationControlItems;
+using Files.Backend.Enums;
+using Files.Backend.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -38,7 +40,7 @@ namespace Files.Uwp.Filesystem
                         Text = folder.DisplayName,
                         Path = folder.Path,
                         Logo = logoURI,
-                        MenuOptions = new ContextMenuOptions{ IsLocationItem = true },
+                        MenuOptions = new ContextMenuOptions { IsLocationItem = true },
                     };
 
                     lock (distros)

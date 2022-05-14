@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Uwp.Dialogs;
+﻿using Files.Uwp.Dialogs;
 using Files.Shared.Enums;
 using Files.Uwp.EventArguments;
 using Files.Uwp.Filesystem;
@@ -36,6 +35,7 @@ using SortDirection = Files.Shared.Enums.SortDirection;
 using Files.Backend.Enums;
 using Files.Backend.Services;
 using Files.Backend.ViewModels.Dialogs.AddItemDialog;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Views
 {

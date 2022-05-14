@@ -2,7 +2,6 @@
 using Files.Backend.Services.Settings;
 using Files.Uwp.Filesystem;
 using Files.Uwp.Filesystem.StorageItems;
-using Files.Shared;
 using Files.Shared.Enums;
 using Files.Uwp.ViewModels;
 using Files.Uwp.Views;
@@ -17,6 +16,7 @@ using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.Storage.Search;
 using Windows.System;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Helpers
 {

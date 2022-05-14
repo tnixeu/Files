@@ -1,9 +1,11 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Files.Backend.Enums;
+using Files.Backend.Helpers;
+using Files.Backend.Models.CommandLine;
 using Files.Backend.Services;
 using Files.Backend.Services.Settings;
 using Files.Shared;
 using Files.Shared.Extensions;
-using Files.Uwp.CommandLine;
 using Files.Uwp.Controllers;
 using Files.Uwp.Filesystem;
 using Files.Uwp.Filesystem.FilesystemHistory;
@@ -56,7 +58,6 @@ namespace Files.Uwp
         public static PaneViewModel PaneViewModel { get; private set; }
         public static PreviewPaneViewModel PreviewPaneViewModel { get; private set; }
         public static JumpListManager JumpList { get; private set; }
-        public static SidebarPinnedController SidebarPinnedController { get; private set; }
         public static TerminalController TerminalController { get; private set; }
         public static CloudDrivesManager CloudDrivesManager { get; private set; }
         public static NetworkDrivesManager NetworkDrivesManager { get; private set; }
@@ -121,6 +122,7 @@ namespace Files.Uwp
                 .AddSingleton<IThreadingService, ThreadingService>()
                 .AddSingleton<ILocalizationService, LocalizationService>()
                 .AddSingleton<IUpdateService, UpdateService>()
+                .AddSingleton<IPinnedItemsService, PinnedItemsService>()
 
                 // TODO(i): FileSystem operations:
                 // (IFilesystemHelpersService, IFilesystemOperationsService)
@@ -151,7 +153,6 @@ namespace Files.Uwp
             CloudDrivesManager ??= new CloudDrivesManager();
             WSLDistroManager ??= new WSLDistroManager();
             FileTagsManager ??= new FileTagsManager();
-            SidebarPinnedController ??= new SidebarPinnedController();
             TerminalController ??= new TerminalController();
         }
 
@@ -188,8 +189,7 @@ namespace Files.Uwp
                     LibraryManager.UpdateLibrariesAsync(),
                     OptionalTask(NetworkDrivesManager.UpdateDrivesAsync(), appearanceSettingsService.ShowNetworkDrivesSection),
                     OptionalTask(WSLDistroManager.UpdateDrivesAsync(), appearanceSettingsService.ShowWslSection),
-                    OptionalTask(FileTagsManager.UpdateFileTagsAsync(), appearanceSettingsService.ShowFileTagsSection),
-                    SidebarPinnedController.InitializeAsync()
+                    OptionalTask(FileTagsManager.UpdateFileTagsAsync(), appearanceSettingsService.ShowFileTagsSection)
                 );
                 await Task.WhenAll(
                     AppSettings.DetectQuickLook(),

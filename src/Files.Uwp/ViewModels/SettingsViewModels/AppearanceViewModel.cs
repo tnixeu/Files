@@ -8,12 +8,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Xaml;
+using Files.Backend.Services;
 
 namespace Files.Uwp.ViewModels.SettingsViewModels
 {
     public class AppearanceViewModel : ObservableObject
     {
         private IUserSettingsService UserSettingsService { get; } = Ioc.Default.GetService<IUserSettingsService>();
+        private IPinnedItemsService PinnedItemsService { get; } = Ioc.Default.GetService<IPinnedItemsService>();
 
         private int selectedThemeIndex = (int)Enum.Parse(typeof(ElementTheme), ThemeHelper.RootTheme.ToString());
         private AppTheme selectedTheme = App.AppSettings.SelectedTheme;
@@ -146,7 +148,7 @@ namespace Files.Uwp.ViewModels.SettingsViewModels
                 if (value != UserSettingsService.AppearanceSettingsService.PinRecycleBinToSidebar)
                 {
                     UserSettingsService.AppearanceSettingsService.PinRecycleBinToSidebar = value;
-                    _ = App.SidebarPinnedController.Model.ShowHideRecycleBinItemAsync(value);
+                    PinnedItemsService.RefreshPinnedItems();
                     OnPropertyChanged();
                 }
             }

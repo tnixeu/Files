@@ -1,4 +1,5 @@
-﻿using Files.Shared;
+﻿using Files.Shared.Enums;
+using Files.Shared.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

@@ -8,9 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mconv="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-    xmlns:navigationcontrolitems="using:Files.Uwp.DataModels.NavigationControlItems"
     xmlns:vc="using:Files.Uwp.ValueConverters"
-    HorizontalAlignment="Stretch"
+	xmlns:navigationcontrolitems="using:Files.Backend.DataModels.NavigationControlItems"
+	xmlns:navigationcontrolitems1="using:Files.Uwp.DataModels.NavigationControlItems"
+	HorizontalAlignment="Stretch"
     d:DesignHeight="768"
     d:DesignWidth="200"
     IsBackButtonVisible="Collapsed"
@@ -46,7 +47,7 @@
             <mconv:BoolNegationConverter x:Key="BoolNegationConverter" />
             <vc:ColorModelToColorConverter x:Key="ColorModelToColorConverter" />
 
-            <DataTemplate x:Key="LocationNavItem" x:DataType="navigationcontrolitems:LocationItem">
+            <DataTemplate x:Key="LocationNavItem" x:DataType="navigationcontrolitems1:LocationItem">
                 <muxc:NavigationViewItem
                     AllowDrop="True"
                     AutomationProperties.AutomationId="{x:Bind Text}"
@@ -75,7 +76,7 @@
                 </muxc:NavigationViewItem>
             </DataTemplate>
 
-            <DataTemplate x:Key="DriveNavItem" x:DataType="navigationcontrolitems:DriveItem">
+            <DataTemplate x:Key="DriveNavItem" x:DataType="navigationcontrolitems1:DriveItem">
                 <muxc:NavigationViewItem
                     Padding="0"
                     AllowDrop="True"

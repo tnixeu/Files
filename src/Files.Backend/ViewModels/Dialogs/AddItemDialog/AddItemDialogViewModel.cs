@@ -5,7 +5,7 @@ using Files.Backend.Extensions;
 using Files.Backend.Models.Dialogs;
 using Files.Backend.Models.Imaging;
 using Files.Backend.Services;
-using Files.Shared;
+using Files.Shared.Models.Shell;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

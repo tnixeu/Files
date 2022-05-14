@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using Files.Backend.DataModels.NavigationControlItems;
+using Files.Backend.Enums;
+using Files.Backend.Models;
 using Files.Backend.Services.Settings;
 using Files.Shared;
-using Files.Uwp.DataModels.NavigationControlItems;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -40,7 +42,7 @@ namespace Files.Uwp.Filesystem
                         Text = tag.TagName,
                         Path = $"tag:{tag.TagName}",
                         FileTag = tag,
-                        MenuOptions = new ContextMenuOptions{ IsLocationItem = true },
+                        MenuOptions = new ContextMenuOptions { IsLocationItem = true },
                     };
 
                     lock (fileTags)

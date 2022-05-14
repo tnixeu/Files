@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Uwp.Dialogs;
+﻿using Files.Uwp.Dialogs;
 using Files.Shared.Enums;
 using Files.Uwp.Extensions;
 using Files.Uwp.Filesystem;
@@ -28,6 +27,9 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Files.Backend.Enums;
+using Files.Shared.Models.Shell;
+using Files.Backend.Services;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace Files.Uwp.Interacts
 {
@@ -48,6 +50,8 @@ namespace Files.Uwp.Interacts
         #region Private Members
 
         private readonly IShellPage associatedInstance;
+
+        private IPinnedItemsService PinnedItemsService { get; } = Ioc.Default.GetService<IPinnedItemsService>();
 
         private readonly ItemManipulationModel itemManipulationModel;
 
@@ -143,14 +147,14 @@ namespace Files.Uwp.Interacts
             }
         }
 
-        public virtual void SidebarPinItem(RoutedEventArgs e)
+        public async virtual void SidebarPinItem(RoutedEventArgs e)
         {
-            SidebarHelpers.PinItems(SlimContentPage.SelectedItems);
+            await PinnedItemsService.AddPinnedItemsByPathAsync(SlimContentPage.SelectedItems.Select(x => x.ItemPath).ToList());
         }
 
-        public virtual void SidebarUnpinItem(RoutedEventArgs e)
+        public async virtual void SidebarUnpinItem(RoutedEventArgs e)
         {
-            SidebarHelpers.UnpinItems(SlimContentPage.SelectedItems);
+            await PinnedItemsService.RemovePinnedItemsByPathAsync(SlimContentPage.SelectedItems.Select(x => x.ItemPath).ToList());
         }
 
         public virtual void OpenItem(RoutedEventArgs e)
@@ -158,9 +162,9 @@ namespace Files.Uwp.Interacts
             NavigationHelpers.OpenSelectedItems(associatedInstance, false);
         }
 
-        public virtual void UnpinDirectoryFromFavorites(RoutedEventArgs e)
+        public async virtual void UnpinDirectoryFromFavorites(RoutedEventArgs e)
         {
-            App.SidebarPinnedController.Model.RemoveItem(associatedInstance.FilesystemViewModel.WorkingDirectory);
+            await PinnedItemsService.RemovePinnedItemByPathAsync(associatedInstance.FilesystemViewModel.WorkingDirectory);
         }
 
         public virtual async void EmptyRecycleBin(RoutedEventArgs e)
@@ -416,9 +420,9 @@ namespace Files.Uwp.Interacts
             }
         }
 
-        public virtual void PinDirectoryToFavorites(RoutedEventArgs e)
+        public async virtual void PinDirectoryToFavorites(RoutedEventArgs e)
         {
-            App.SidebarPinnedController.Model.AddItem(associatedInstance.FilesystemViewModel.WorkingDirectory);
+            await PinnedItemsService.AddPinnedItemByPathAsync(associatedInstance.FilesystemViewModel.WorkingDirectory);
         }
 
         public virtual async void ItemPointerPressed(PointerRoutedEventArgs e)

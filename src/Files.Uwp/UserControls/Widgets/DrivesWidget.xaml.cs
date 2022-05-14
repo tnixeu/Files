@@ -22,6 +22,7 @@ using Windows.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.Core;
 using Files.Uwp.UserControls.Widgets;
 using System.Collections.Specialized;
+using Files.Backend.DataModels.NavigationControlItems;
 
 namespace Files.Uwp.UserControls.Widgets
 {

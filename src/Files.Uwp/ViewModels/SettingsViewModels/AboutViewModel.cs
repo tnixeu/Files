@@ -18,6 +18,9 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Xaml.Controls;
+using Files.Backend.Services;
+using System.Text.Json;
+using System.Collections.Generic;
 
 namespace Files.Uwp.ViewModels.SettingsViewModels
 {
@@ -25,6 +28,7 @@ namespace Files.Uwp.ViewModels.SettingsViewModels
     {
         private IUserSettingsService UserSettingsService { get; } = Ioc.Default.GetRequiredService<IUserSettingsService>();
         private IBundlesSettingsService BundlesSettingsService { get; } = Ioc.Default.GetRequiredService<IBundlesSettingsService>();
+        private IPinnedItemsService PinnedItemsService { get; } = Ioc.Default.GetService<IPinnedItemsService>();
         protected IFileTagsSettingsService FileTagsSettingsService { get; } = Ioc.Default.GetRequiredService<IFileTagsSettingsService>();
 
         public ICommand OpenLogLocationCommand { get; }
@@ -35,6 +39,8 @@ namespace Files.Uwp.ViewModels.SettingsViewModels
         public ICommand ImportSettingsCommand { get; }
 
         public ICommand ClickAboutFeedbackItemCommand { get; }
+
+        public string JsonFileName { get; } = "PinnedItems.json";
 
         public AboutViewModel()
         {
@@ -74,8 +80,9 @@ namespace Files.Uwp.ViewModels.SettingsViewModels
                     string exportBundles = (string)BundlesSettingsService.ExportSettings();
                     await bundles.WriteTextAsync(exportBundles);
                     // Export pinned items
-                    var pinnedItems = await BaseStorageFile.GetFileFromPathAsync(Path.Combine(localFolderPath, Constants.LocalSettings.SettingsFolderName, App.SidebarPinnedController.JsonFileName));
-                    await pinnedItems.CopyAsync(zipFolder, pinnedItems.Name, NameCollisionOption.ReplaceExisting);
+                    var pinnedItemsFile = await zipFolder.CreateFileAsync(JsonFileName, CreationCollisionOption.ReplaceExisting);
+                    var paths = await PinnedItemsService.GetPinnedItemPathsAsync();
+                    await pinnedItemsFile.WriteTextAsync(JsonSerializer.Serialize(paths, new JsonSerializerOptions() { WriteIndented = true }));
                     // Export terminals config
                     var terminals = await BaseStorageFile.GetFileFromPathAsync(Path.Combine(localFolderPath, Constants.LocalSettings.SettingsFolderName, App.TerminalController.JsonFileName));
                     await terminals.CopyAsync(zipFolder, terminals.Name, NameCollisionOption.ReplaceExisting);
@@ -120,9 +127,9 @@ namespace Files.Uwp.ViewModels.SettingsViewModels
                     string importBundles = await bundles.ReadTextAsync();
                     BundlesSettingsService.ImportSettings(importBundles);
                     // Import pinned items
-                    var pinnedItems = await zipFolder.GetFileAsync(App.SidebarPinnedController.JsonFileName);
-                    await pinnedItems.CopyAsync(settingsFolder, pinnedItems.Name, NameCollisionOption.ReplaceExisting);
-                    await App.SidebarPinnedController.ReloadAsync();
+                    var pinnedItemsFile = await zipFolder.GetFileAsync(JsonFileName);
+                    var pinnedItemPaths = JsonSerializer.Deserialize<List<string>>(await pinnedItemsFile.ReadTextAsync());
+                    await PinnedItemsService.AddPinnedItemsByPathAsync(pinnedItemPaths);
                     // Import terminals config
                     var terminals = await zipFolder.GetFileAsync(App.TerminalController.JsonFileName);
                     await terminals.CopyAsync(settingsFolder, terminals.Name, NameCollisionOption.ReplaceExisting);
@@ -153,7 +160,7 @@ namespace Files.Uwp.ViewModels.SettingsViewModels
                 Clipboard.SetContent(dataPackage);
             });
         }
-        
+
         public async void SupportUs()
         {
             await Launcher.LaunchUriAsync(new Uri(Constants.GitHub.SupportUsUrl));

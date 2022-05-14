@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Shared.Extensions;
+﻿using Files.Shared.Extensions;
 using Files.FullTrust.Helpers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Vanara.Windows.Shell;
 using Windows.Foundation.Collections;
+using Files.Shared.Models.Shell;
 
 namespace Files.FullTrust.MessageHandlers
 {

@@ -1,5 +1,5 @@
-﻿using Files.Shared;
-using Files.Shared.Enums;
+﻿using Files.Shared.Enums;
+using Files.Shared.Models.Shell;
 using Files.Uwp.Dialogs;
 using Files.Uwp.Filesystem;
 using Files.Uwp.ViewModels.Dialogs;

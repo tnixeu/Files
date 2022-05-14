@@ -143,7 +143,7 @@ namespace Files.Uwp.Views
             }
         }
 
-        private bool IsChanged(LibraryItem lib, out string newDefaultSaveFolder, out string[] newFolders, out bool? newIsPinned)
+        private bool IsChanged(LibraryItem lib, out string newDefaultSaveFolder, out string[] newFolders, out bool? newIsPinned, bool isLibraryPinned)
         {
             bool isChanged = false;
 
@@ -164,7 +164,7 @@ namespace Files.Uwp.Views
                 isChanged = true;
             }
 
-            if (isPinned != lib.IsPinned)
+            if (isPinned != isLibraryPinned)
             {
                 newIsPinned = isPinned;
                 isChanged = true;
@@ -182,7 +182,8 @@ namespace Files.Uwp.Views
                     // Skip checks / updates and close dialog when the library is empty
                     return true;
                 }
-                if (!IsChanged(props.Library, out string newDefaultSaveFolder, out string[] newFolders, out bool? newIsPinned))
+                var isLibraryPinned = await props.Library.CheckIfPinnedAsync();
+                if (!IsChanged(props.Library, out string newDefaultSaveFolder, out string[] newFolders, out bool? newIsPinned, isLibraryPinned))
                 {
                     // Skip updates and close dialog when nothing changed
                     return true;

@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Shared.Enums;
+﻿using Files.Shared.Enums;
 using Files.Uwp.Extensions;
 using Files.Uwp.Filesystem;
 using Files.Uwp.Interacts;
@@ -18,6 +17,7 @@ using Windows.Storage;
 using Windows.System;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Imaging;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Helpers
 {
@@ -37,9 +37,9 @@ namespace Files.Uwp.Helpers
             return await ShellContextmenuHelper.GetShellContextmenuAsync(shiftPressed: shiftPressed, showOpenMenu: showOpenMenu, connection: connection, workingDirectory: workingDir, selectedItems: selectedItems);
         }
 
-        public static List<ContextMenuFlyoutItemViewModel> GetBaseContextCommandsWithoutShellItems(NamedPipeAsAppServiceConnection connection, CurrentInstanceViewModel currentInstanceViewModel, ItemViewModel itemViewModel, BaseLayoutCommandsViewModel commandsViewModel, bool shiftPressed, bool showOpenMenu)
+        public static async Task<List<ContextMenuFlyoutItemViewModel>> GetBaseContextCommandsWithoutShellItemsAsync(NamedPipeAsAppServiceConnection connection, CurrentInstanceViewModel currentInstanceViewModel, ItemViewModel itemViewModel, BaseLayoutCommandsViewModel commandsViewModel, bool shiftPressed, bool showOpenMenu)
         {
-            var menuItemsList = GetBaseLayoutMenuItems(currentInstanceViewModel, itemViewModel, commandsViewModel);
+            var menuItemsList = await GetBaseLayoutMenuItemsAsync(currentInstanceViewModel, itemViewModel, commandsViewModel);
             menuItemsList = Filter(items: menuItemsList, shiftPressed: shiftPressed, currentInstanceViewModel: currentInstanceViewModel, selectedItems: new List<ListedItem>(), removeOverflowMenu: false);
             return menuItemsList;
         }
@@ -93,7 +93,7 @@ namespace Files.Uwp.Helpers
                 && item.ShowItem;
         }
 
-        public static List<ContextMenuFlyoutItemViewModel> GetBaseLayoutMenuItems(CurrentInstanceViewModel currentInstanceViewModel, ItemViewModel itemViewModel, BaseLayoutCommandsViewModel commandsViewModel)
+        public static async Task<List<ContextMenuFlyoutItemViewModel>> GetBaseLayoutMenuItemsAsync(CurrentInstanceViewModel currentInstanceViewModel, ItemViewModel itemViewModel, BaseLayoutCommandsViewModel commandsViewModel)
         {
             IUserSettingsService userSettingsService = Ioc.Default.GetService<IUserSettingsService>();
 
@@ -537,7 +537,7 @@ namespace Files.Uwp.Helpers
                     Text = "BaseLayoutItemContextFlyoutPinToFavorites/Text".GetLocalized(),
                     Glyph = "\uE840",
                     Command = commandsViewModel.PinDirectoryToFavoritesCommand,
-                    ShowItem = !itemViewModel.CurrentFolder.IsPinned & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
+                    ShowItem = !(await itemViewModel.CurrentFolder.CheckIfPinnedAsync()) & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
                     ShowInFtpPage = true,
                 },
                 new ContextMenuFlyoutItemViewModel()
@@ -545,7 +545,7 @@ namespace Files.Uwp.Helpers
                     Text = "BaseLayoutContextFlyoutUnpinFromFavorites/Text".GetLocalized(),
                     Glyph = "\uE77A",
                     Command = commandsViewModel.UnpinDirectoryFromFavoritesCommand,
-                    ShowItem = itemViewModel.CurrentFolder.IsPinned & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
+                    ShowItem = await itemViewModel.CurrentFolder.CheckIfPinnedAsync() & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
                     ShowInFtpPage = true,
                 },
                 new ContextMenuFlyoutItemViewModel()
@@ -967,7 +967,7 @@ namespace Files.Uwp.Helpers
                     Text = "BaseLayoutItemContextFlyoutPinToFavorites/Text".GetLocalized(),
                     Glyph = "\uE840",
                     Command = commandsViewModel.SidebarPinItemCommand,
-                    ShowItem = selectedItems.All(x => x.PrimaryItemAttribute == StorageItemTypes.Folder && !x.IsZipItem && !x.IsPinned) & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
+                    ShowItem = selectedItems.All(x => x.PrimaryItemAttribute == StorageItemTypes.Folder && !x.IsZipItem) & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
                     ShowInSearchPage = true,
                     ShowInFtpPage = true,
                 },
@@ -976,7 +976,7 @@ namespace Files.Uwp.Helpers
                     Text = "BaseLayoutContextFlyoutUnpinFromFavorites/Text".GetLocalized(),
                     Glyph = "\uE77A",
                     Command = commandsViewModel.SidebarUnpinItemCommand,
-                    ShowItem = selectedItems.All(x => x.PrimaryItemAttribute == StorageItemTypes.Folder && !x.IsZipItem && x.IsPinned) & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
+                    ShowItem = selectedItems.All(x => x.PrimaryItemAttribute == StorageItemTypes.Folder && !x.IsZipItem) & userSettingsService.AppearanceSettingsService.ShowFavoritesSection,
                     ShowInSearchPage = true,
                     ShowInFtpPage = true,
                 },

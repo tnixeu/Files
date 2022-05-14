@@ -1,4 +1,5 @@
-﻿using Files.Shared;
+﻿using Files.Shared.Enums;
+using Files.Shared.Models;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;

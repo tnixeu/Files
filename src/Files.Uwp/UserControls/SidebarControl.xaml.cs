@@ -27,6 +27,11 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using Files.Backend.Enums;
+using Files.Backend.Models;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.ApplicationModel.Core;
+using Files.Backend.DataModels.NavigationControlItems;
 
 namespace Files.Uwp.UserControls
 {
@@ -64,11 +69,6 @@ namespace Files.Uwp.UserControls
         private double originalSize = 0;
 
         private bool lockFlag = false;
-
-        /// <summary>
-        /// The Model for the pinned sidebar items
-        /// </summary>
-        public SidebarPinnedModel SidebarPinnedModel => App.SidebarPinnedController.Model;
 
         public static readonly DependencyProperty EmptyRecycleBinCommandProperty = DependencyProperty.Register(nameof(EmptyRecycleBinCommand), typeof(ICommand), typeof(SidebarControl), new PropertyMetadata(null));
 
@@ -143,11 +143,11 @@ namespace Files.Uwp.UserControls
             dragOverItemTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
 
             HideSectionCommand = new RelayCommand(HideSection);
-            UnpinItemCommand = new RelayCommand(UnpinItem);
-            MoveItemToTopCommand = new RelayCommand(MoveItemToTop);
-            MoveItemUpCommand = new RelayCommand(MoveItemUp);
-            MoveItemDownCommand = new RelayCommand(MoveItemDown);
-            MoveItemToBottomCommand = new RelayCommand(MoveItemToBottom);
+            UnpinItemCommand = new AsyncRelayCommand(UnpinItemAsync);
+            MoveItemToTopCommand = new AsyncRelayCommand(MoveItemToTopAsync);
+            MoveItemUpCommand = new AsyncRelayCommand(MoveItemUpAsync);
+            MoveItemDownCommand = new AsyncRelayCommand(MoveItemDownAsync);
+            MoveItemToBottomCommand = new AsyncRelayCommand(MoveItemToBottomAsync);
             OpenInNewTabCommand = new RelayCommand(OpenInNewTab);
             OpenInNewWindowCommand = new RelayCommand(OpenInNewWindow);
             OpenInNewPaneCommand = new RelayCommand(OpenInNewPane);
@@ -187,8 +187,8 @@ namespace Files.Uwp.UserControls
         {
             ContextMenuOptions options = item.MenuOptions;
 
-            bool showMoveItemUp = options.IsItemMovable ? App.SidebarPinnedController.Model.IndexOfItem(item) > 1 : false;
-            bool showMoveItemDown = options.IsItemMovable ? App.SidebarPinnedController.Model.IndexOfItem(item) < App.SidebarPinnedController.Model.FavoriteItems.Count : false;
+            bool showMoveItemUp = options.IsItemMovable ? ViewModel.IndexOfItem(item) > 1 : false;
+            bool showMoveItemDown = options.IsItemMovable ? ViewModel.IndexOfItem(item) < ViewModel.Favorites.Count : false;
 
             return new List<ContextMenuFlyoutItemViewModel>()
             {
@@ -364,22 +364,22 @@ namespace Files.Uwp.UserControls
             await NavigationHelpers.OpenPathInNewWindowAsync(rightClickedItem.Path);
         }
 
-        private void UnpinItem()
+        private async Task UnpinItemAsync()
         {
             if (rightClickedItem.MenuOptions.ShowEmptyRecycleBin)
             {
                 UserSettingsService.AppearanceSettingsService.PinRecycleBinToSidebar = false;
-                _ = App.SidebarPinnedController.Model.ShowHideRecycleBinItemAsync(false);
+                _ = ViewModel.ShowHideRecycleBinItemAsync(false);
             }
             else if (rightClickedItem.Section == SectionType.Favorites)
             {
-                App.SidebarPinnedController.Model.RemoveItem(rightClickedItem.Path);
+                await ViewModel.RemoveItemAsync(rightClickedItem as LocationItem);
             }
         }
 
-        private void MoveItemToTop()
+        private async Task MoveItemToTopAsync()
         {
-            if (rightClickedItem.Section == SectionType.Favorites)
+            if (rightClickedItem.Section == SectionType.Favorites && rightClickedItem is LocationItem li)
             {
                 bool isSelectedSidebarItem = false;
 
@@ -388,8 +388,8 @@ namespace Files.Uwp.UserControls
                     isSelectedSidebarItem = true;
                 }
 
-                int oldIndex = App.SidebarPinnedController.Model.IndexOfItem(rightClickedItem);
-                App.SidebarPinnedController.Model.MoveItem(rightClickedItem, oldIndex, 1);
+                int oldIndex = ViewModel.IndexOfItem(rightClickedItem);
+                await ViewModel.MoveItemAsync(li, oldIndex, 1);
 
                 if (isSelectedSidebarItem)
                 {
@@ -398,9 +398,9 @@ namespace Files.Uwp.UserControls
             }
         }
 
-        private void MoveItemUp()
+        private async Task MoveItemUpAsync()
         {
-            if (rightClickedItem.Section == SectionType.Favorites)
+            if (rightClickedItem.Section == SectionType.Favorites && rightClickedItem is LocationItem li)
             {
                 bool isSelectedSidebarItem = false;
 
@@ -409,8 +409,8 @@ namespace Files.Uwp.UserControls
                     isSelectedSidebarItem = true;
                 }
 
-                int oldIndex = App.SidebarPinnedController.Model.IndexOfItem(rightClickedItem);
-                App.SidebarPinnedController.Model.MoveItem(rightClickedItem, oldIndex, oldIndex - 1);
+                int oldIndex = ViewModel.IndexOfItem(rightClickedItem);
+                await ViewModel.MoveItemAsync(li, oldIndex, oldIndex - 1);
 
                 if (isSelectedSidebarItem)
                 {
@@ -419,9 +419,9 @@ namespace Files.Uwp.UserControls
             }
         }
 
-        private void MoveItemDown()
+        private async Task MoveItemDownAsync()
         {
-            if (rightClickedItem.Section == SectionType.Favorites)
+            if (rightClickedItem.Section == SectionType.Favorites && rightClickedItem is LocationItem li)
             {
                 bool isSelectedSidebarItem = false;
 
@@ -430,8 +430,8 @@ namespace Files.Uwp.UserControls
                     isSelectedSidebarItem = true;
                 }
 
-                int oldIndex = App.SidebarPinnedController.Model.IndexOfItem(rightClickedItem);
-                App.SidebarPinnedController.Model.MoveItem(rightClickedItem, oldIndex, oldIndex + 1);
+                int oldIndex = ViewModel.IndexOfItem(rightClickedItem);
+                await ViewModel.MoveItemAsync(li, oldIndex, oldIndex + 1);
 
                 if (isSelectedSidebarItem)
                 {
@@ -440,7 +440,7 @@ namespace Files.Uwp.UserControls
             }
         }
 
-        private void MoveItemToBottom()
+        private async Task MoveItemToBottomAsync()
         {
             if (rightClickedItem.Section == SectionType.Favorites)
             {
@@ -451,8 +451,8 @@ namespace Files.Uwp.UserControls
                     isSelectedSidebarItem = true;
                 }
 
-                int oldIndex = App.SidebarPinnedController.Model.IndexOfItem(rightClickedItem);
-                App.SidebarPinnedController.Model.MoveItem(rightClickedItem, oldIndex, App.SidebarPinnedController.Model.FavoriteItems.Count);
+                int oldIndex = ViewModel.IndexOfItem(rightClickedItem);
+                await ViewModel.MoveItemAsync(rightClickedItem as LocationItem, oldIndex, ViewModel.Favorites.Count);
 
                 if (isSelectedSidebarItem)
                 {
@@ -643,7 +643,7 @@ namespace Files.Uwp.UserControls
 
                     foreach (var item in storageItems)
                     {
-                        if (item.ItemType == FilesystemItemType.Directory && !SidebarPinnedModel.FavoriteItems.Contains(item.Path))
+                        if (item.ItemType == FilesystemItemType.Directory && !ViewModel.Favorites.Any(x => x.Path.Equals(item.Path)))
                         {
                             haveFoldersToPin = true;
                             break;
@@ -784,9 +784,9 @@ namespace Files.Uwp.UserControls
                     var storageItems = await Filesystem.FilesystemHelpers.GetDraggedStorageItems(e.DataView);
                     foreach (var item in storageItems)
                     {
-                        if (item.ItemType == FilesystemItemType.Directory && !SidebarPinnedModel.FavoriteItems.Contains(item.Path))
+                        if (item.ItemType == FilesystemItemType.Directory && !ViewModel.Favorites.Any(x => x.Path.Equals(item.Path)))
                         {
-                            SidebarPinnedModel.AddItem(item.Path);
+                            await ViewModel.AddItemAsync(item.Path);
                         }
                     }
                 }
@@ -811,7 +811,7 @@ namespace Files.Uwp.UserControls
                 // Else if the dropped item is a location item
 
                 // Swap the two items
-                SidebarPinnedModel.SwapItems(sourceLocationItem, locationItem);
+                await ViewModel.SwapItemsAsync(sourceLocationItem, locationItem);
             }
 
             await Task.Yield();

@@ -1,5 +1,4 @@
-﻿using Common;
-using Files.Shared;
+﻿using Files.Shared;
 using Files.Shared.Extensions;
 using Files.FullTrust.Helpers;
 using Microsoft.Win32;
@@ -18,6 +17,9 @@ using Vanara.PInvoke;
 using Vanara.Windows.Shell;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation.Collections;
+using Files.Shared.Utils;
+using Files.Shared.Models.Shell;
+using Files.Shared.Models;
 
 namespace Files.FullTrust.MessageHandlers
 {
@@ -630,7 +632,7 @@ namespace Files.FullTrust.MessageHandlers
                         }
                         else
                         {
-                            await Win32API.SendMessageAsync(connection, new ValueSet(), 
+                            await Win32API.SendMessageAsync(connection, new ValueSet(),
                                 message.Get("RequestID", (string)null));
                         }
                     }

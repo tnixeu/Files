@@ -2,9 +2,9 @@
 using Files.Backend.Services;
 using Files.Backend.Services.Settings;
 using Files.Backend.ViewModels.Dialogs.FileSystemDialog;
-using Files.Shared;
 using Files.Shared.Enums;
 using Files.Shared.Extensions;
+using Files.Shared.Models.Shell;
 using Files.Uwp.Filesystem.FilesystemHistory;
 using Files.Uwp.Helpers;
 using Files.Uwp.Interacts;

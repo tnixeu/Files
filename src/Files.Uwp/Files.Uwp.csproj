@@ -119,13 +119,7 @@
     </Compile>
     <Compile Include="BaseLayout.cs" />
     <Compile Include="Behaviors\StickyHeaderBehavior.cs" />
-    <Compile Include="CommandLine\CommandLineParser.cs" />
-    <Compile Include="CommandLine\ParsedCommand.cs" />
-    <Compile Include="CommandLine\ParsedCommands.cs" />
-    <Compile Include="CommandLine\ParsedCommandType.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Controllers\IJson.cs" />
-    <Compile Include="Controllers\SidebarPinnedController.cs" />
     <Compile Include="Converters\BoolToSelectionMode.cs" />
     <Compile Include="Converters\Converters.cs" />
     <Compile Include="Converters\DateTimeOffsetToString.cs" />
@@ -142,8 +136,8 @@
     <Compile Include="Converters\UInt32ToString.cs" />
     <Compile Include="Converters\VisibilityInvertConverter.cs" />
     <Compile Include="Converters\LayoutModeToBoolConverter.cs" />
-    <Compile Include="DataModels\NavigationControlItems\FileTagItem.cs" />
-    <Compile Include="DataModels\NavigationControlItems\WslDistroItem.cs" />
+    <Compile Include="DataModels\NavigationControlItemsImpl\DriveItem.cs" />
+    <Compile Include="DataModels\NavigationControlItemsImpl\LocationItem.cs" />
     <Compile Include="Extensions\ShellNewEntryExtensions.cs" />
     <Compile Include="Dialogs\DecompressArchiveDialog.xaml.cs">
       <DependentUpon>DecompressArchiveDialog.xaml</DependentUpon>
@@ -194,7 +188,6 @@
     <Compile Include="Helpers\ColorHelpers.cs" />
     <Compile Include="Helpers\CommonPaths.cs" />
     <Compile Include="Helpers\FileExtensionHelpers.cs" />
-    <Compile Include="Helpers\ItemListDisplayHelpers\BlockingListEnumerator.cs" />
     <Compile Include="Helpers\LocalizedEnumHelper.cs" />
     <Compile Include="Helpers\ResourceHelpers.cs" />
     <Compile Include="Helpers\FtpHelpers.cs" />
@@ -217,7 +210,6 @@
     <Compile Include="Helpers\AppServiceConnectionHelper.cs" />
     <Compile Include="Helpers\AppUpdater.cs" />
     <Compile Include="DataModels\DefaultLanguageModel.cs" />
-    <Compile Include="DataModels\SidebarPinnedModel.cs" />
     <Compile Include="Controllers\TerminalController.cs" />
     <Compile Include="Helpers\ContextFlyoutItemHelper.cs" />
     <Compile Include="Helpers\EnumConversionHelpers.cs" />
@@ -250,6 +242,7 @@
     <Compile Include="ServicesImplementation\DialogService.cs" />
     <Compile Include="ServicesImplementation\ImagingService.cs" />
     <Compile Include="ServicesImplementation\LocalizationService.cs" />
+    <Compile Include="ServicesImplementation\PinnedItemsService.cs" />
     <Compile Include="ServicesImplementation\Settings\AppearanceSettingsService.cs" />
     <Compile Include="ServicesImplementation\Settings\BundlesSettingsService.cs" />
     <Compile Include="ServicesImplementation\Settings\FileTagsSettingsService.cs" />
@@ -295,14 +288,12 @@
     <Compile Include="Helpers\LibraryHelper.cs" />
     <Compile Include="Helpers\MenuFlyoutHelper.cs" />
     <Compile Include="Helpers\BitmapHelper.cs" />
-    <Compile Include="Helpers\CollectionDebugView.cs" />
     <Compile Include="Helpers\DynamicDialogFactory.cs" />
     <Compile Include="Helpers\FileListCache\FileListCacheController.cs" />
     <Compile Include="Helpers\FileListCache\IFileListCache.cs" />
     <Compile Include="Helpers\IntervalSampler.cs" />
     <Compile Include="Helpers\QuickLookHelpers.cs" />
     <Compile Include="Helpers\MultitaskingTabsHelpers.cs" />
-    <Compile Include="Helpers\SidebarHelpers.cs" />
     <Compile Include="Helpers\XamlHelpers\DependencyObjectHelpers.cs" />
     <Compile Include="Helpers\XamlHelpers\SystemTypeToXaml.cs" />
     <Compile Include="Helpers\AsyncManualResetEvent.cs" />
@@ -450,7 +441,6 @@
     <Compile Include="Helpers\PostBannerHelpers.cs" />
     <Compile Include="Helpers\RecycleBinHelpers.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Helpers\ItemListDisplayHelpers\BulkConcurrentObservableCollection.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
     <Compile Include="Extensions\Win32FindDataExtensions.cs" />
     <Compile Include="Interacts\RemovableDevice.cs" />
@@ -481,7 +471,6 @@
     <Compile Include="Dialogs\PropertiesDialog.xaml.cs">
       <DependentUpon>PropertiesDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DataModels\NavigationControlItems\DriveItem.cs" />
     <Compile Include="Filesystem\Drives.cs" />
     <Compile Include="UserControls\MultitaskingControl\TabItem\ITabItem.cs" />
     <Compile Include="UserControls\MultitaskingControl\TabItem\ITabItemControl.cs" />
@@ -512,8 +501,6 @@
     <Compile Include="ViewModels\CurrentInstanceViewModel.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="Filesystem\ListedItem.cs" />
-    <Compile Include="DataModels\NavigationControlItems\INavigationControlItem.cs" />
-    <Compile Include="DataModels\NavigationControlItems\LocationItem.cs" />
     <Compile Include="ViewModels\Properties\BaseProperties.cs" />
     <Compile Include="ViewModels\Properties\CombinedProperties.cs" />
     <Compile Include="ViewModels\Properties\DriveProperties.cs" />

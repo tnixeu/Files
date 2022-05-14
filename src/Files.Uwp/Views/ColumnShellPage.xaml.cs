@@ -1,4 +1,3 @@
-using Files.Shared;
 using Files.Uwp.Dialogs;
 using Files.Shared.Enums;
 using Files.Uwp.EventArguments;
@@ -37,6 +36,7 @@ using SortDirection = Files.Shared.Enums.SortDirection;
 using Files.Backend.Enums;
 using Files.Backend.Services;
 using Files.Backend.ViewModels.Dialogs.AddItemDialog;
+using Files.Shared.Models.Shell;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 

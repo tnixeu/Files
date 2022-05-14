@@ -20,7 +20,8 @@
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:icore="using:Microsoft.Xaml.Interactions.Core"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
-    x:Name="PageRoot"
+	xmlns:helpers1="using:Files.Backend.Models"
+	x:Name="PageRoot"
     NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
@@ -829,7 +830,7 @@
                         <ListView.GroupStyle>
                             <GroupStyle>
                                 <GroupStyle.HeaderTemplate>
-                                    <DataTemplate x:DataType="helpers:IGroupedCollectionHeader">
+                                    <DataTemplate x:DataType="helpers1:IGroupedCollectionHeader">
                                         <StackPanel
                                             Margin="0,0,0,4"
                                             VerticalAlignment="Top"
@@ -916,41 +917,41 @@
                                     Spacing="4">
                                     <Image
                                         Height="36"
-                                        Source="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.ImageSource, Mode=OneWay}"
+										Source="{x:Bind ((helpers:GroupedHeaderViewModel)((helpers1:IGroupedCollectionHeader)Group).Model).ImageSource, Mode=OneWay}"
                                         Stretch="Uniform" />
-                                    <FontIcon FontSize="32" Glyph="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.Icon, Mode=OneWay}" />
+                                    <FontIcon FontSize="32" Glyph="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.Icon, Mode=OneWay}" />
                                     <StackPanel
                                         VerticalAlignment="Center"
-                                        AutomationProperties.Name="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.Text, Mode=OneWay}"
+                                        AutomationProperties.Name="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.Text, Mode=OneWay}"
                                         Orientation="Vertical">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <TextBlock
                                                 VerticalAlignment="Center"
                                                 FontSize="16"
                                                 Style="{StaticResource SubtitleTextBlockStyle}"
-                                                Text="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.Text, Mode=OneWay}" />
+                                                Text="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.Text, Mode=OneWay}" />
 
                                             <TextBlock
                                                 Margin="4,0,0,0"
                                                 VerticalAlignment="Center"
                                                 Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                                                 Style="{StaticResource BodyTextBlockStyle}"
-                                                Text="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.CountText, Mode=OneWay}"
-                                                Visibility="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.ShowCountTextBelow, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}" />
+                                                Text="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.CountText, Mode=OneWay}"
+                                                Visibility="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.ShowCountTextBelow, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}" />
 
                                             <TextBlock
                                                 VerticalAlignment="Center"
                                                 FontSize="14"
                                                 Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                                                 Style="{StaticResource SubheaderTextBlockStyle}"
-                                                Text="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.Subtext, Mode=OneWay}"
-                                                Visibility="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.ShowCountTextBelow, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                Text="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.Subtext, Mode=OneWay}"
+                                                Visibility="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.ShowCountTextBelow, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                         </StackPanel>
                                         <TextBlock
                                             Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
                                             Style="{StaticResource BodyTextBlockStyle}"
-                                            Text="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.CountText, Mode=OneWay}"
-                                            Visibility="{x:Bind ((helpers:IGroupedCollectionHeader)Group).Model.ShowCountTextBelow, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            Text="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.CountText, Mode=OneWay}"
+                                            Visibility="{x:Bind ((helpers1:IGroupedCollectionHeader)Group).Model.ShowCountTextBelow, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataTemplate>

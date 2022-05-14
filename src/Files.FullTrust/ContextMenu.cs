@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.FullTrust.Helpers;
+﻿using Files.FullTrust.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +10,8 @@ using System.Runtime.Versioning;
 using Vanara.InteropServices;
 using Vanara.PInvoke;
 using Vanara.Windows.Shell;
+using Files.Shared.Models;
+using Files.Shared.Enums;
 
 namespace Files.FullTrust
 {

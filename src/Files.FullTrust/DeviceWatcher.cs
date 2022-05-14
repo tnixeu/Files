@@ -1,11 +1,11 @@
-﻿using Files.Shared;
-using Files.FullTrust.MMI;
+﻿using Files.FullTrust.MMI;
 using Microsoft.Management.Infrastructure;
 using System;
 using System.IO.Pipes;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Windows.Foundation.Collections;
+using Files.Shared.Enums;
 
 namespace Files.FullTrust
 {

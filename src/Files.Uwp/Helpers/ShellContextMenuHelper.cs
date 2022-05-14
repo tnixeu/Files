@@ -1,4 +1,3 @@
-using Files.Shared;
 using Files.Uwp.Filesystem;
 using Files.Uwp.ViewModels;
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +11,8 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml.Media.Imaging;
+using Files.Shared.Models;
+using Files.Shared.Enums;
 
 namespace Files.Uwp.Helpers
 {

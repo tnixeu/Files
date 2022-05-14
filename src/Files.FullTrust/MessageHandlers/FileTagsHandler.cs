@@ -1,4 +1,5 @@
 ﻿using Files.Shared.Extensions;
+using Files.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -78,7 +79,7 @@ namespace Files.FullTrust.MessageHandlers
         public void UpdateTagsDb()
         {
             string fileTagsDbPath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "filetags.db");
-            using var dbInstance = new Common.FileTagsDb(fileTagsDbPath, true);
+            using var dbInstance = new FileTagsDb(fileTagsDbPath, true);
             foreach (var file in dbInstance.GetAll())
             {
                 var pathFromFrn = Win32API.PathFromFileId(file.Frn ?? 0, file.FilePath);

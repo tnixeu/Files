@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Files.Backend.Models;
+using Files.Backend.Services;
 using Files.Backend.Services.Settings;
 using Files.Backend.ViewModels.FileTags;
 using Files.Shared.Extensions;
@@ -28,6 +30,9 @@ namespace Files.Uwp.Filesystem
         protected static IUserSettingsService UserSettingsService { get; } = Ioc.Default.GetService<IUserSettingsService>();
 
         protected static IFileTagsSettingsService FileTagsSettingsService { get; } = Ioc.Default.GetService<IFileTagsSettingsService>();
+
+        protected static IPinnedItemsService PinnedItemsService { get; } = Ioc.Default.GetService<IPinnedItemsService>();
+
 
         public bool IsHiddenItem { get; set; } = false;
 
@@ -408,7 +413,17 @@ namespace Files.Uwp.Filesystem
         public bool IsFtpItem => this is FtpItem;
         public bool IsZipItem => this is ZipItem;
         public virtual bool IsExecutable => new[] { ".exe", ".bat", ".cmd" }.Contains(Path.GetExtension(ItemPath), StringComparer.OrdinalIgnoreCase);
-        public bool IsPinned => App.SidebarPinnedController.Model.FavoriteItems.Contains(itemPath);
+
+        /// <summary>
+        /// Determine if a pinned item represents the ItemPath of this ListedItem.
+        /// WARNING: Do not call this method in an item enumeration loop. Otherwise,
+        /// a significant performance penalty will be incurred
+        /// </summary>
+        /// <returns><see langword="true"/> if pinned, otherwise <see langword="false"/></returns>
+        public async Task<bool> CheckIfPinnedAsync()
+        {
+            return await PinnedItemsService.CheckPinnedStatusByPathAsync(itemPath);
+        }
 
         private BaseStorageFile itemFile;
         public BaseStorageFile ItemFile

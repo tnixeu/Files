@@ -9,6 +9,7 @@ using Windows.System;
 using Windows.UI.Xaml.Controls;
 using System.Collections.Generic;
 using System.Linq;
+using Files.Shared.Models;
 
 namespace Files.Uwp.Helpers
 {
@@ -129,7 +130,7 @@ namespace Files.Uwp.Helpers
             return dialog;
         }
 
-        public static DynamicDialog GetFor_FileInUseDialog(List<Shared.Win32Process> lockingProcess = null)
+        public static DynamicDialog GetFor_FileInUseDialog(List<Win32Process> lockingProcess = null)
         {
             DynamicDialog dialog = new DynamicDialog(new DynamicDialogViewModel()
             {

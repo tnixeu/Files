@@ -1,9 +1,9 @@
-﻿using Files.Shared;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Windows.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Input;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Interacts
 {

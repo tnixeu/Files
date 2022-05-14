@@ -1,4 +1,3 @@
-using Files.Shared;
 using Files.Uwp.Filesystem;
 using Files.Uwp.Helpers;
 using Files.Shared.Enums;
@@ -8,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation.Collections;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Views
 {

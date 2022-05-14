@@ -1,4 +1,4 @@
-﻿using Files.Shared;
+﻿using Files.Shared.Models.Shell;
 using System;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;

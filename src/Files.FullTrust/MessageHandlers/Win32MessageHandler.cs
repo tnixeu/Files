@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Shared.Extensions;
+﻿using Files.Shared.Extensions;
 using Files.FullTrust.Helpers;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -16,6 +15,7 @@ using Vanara.Windows.Shell;
 using Windows.ApplicationModel;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Files.Shared.Models.Shell;
 
 namespace Files.FullTrust.MessageHandlers
 {

@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using Files.Backend.Enums;
+using Files.Backend.Models;
 using Files.Backend.Services.Settings;
 using Files.Shared.Enums;
 using Files.Shared.EventArguments;
@@ -369,7 +371,7 @@ namespace Files.Uwp.Views
         {
             SidebarAdaptiveViewModel.IsSidebarOpen = !SidebarAdaptiveViewModel.IsSidebarOpen;
 
-            e.Handled=true;
+            e.Handled = true;
         }
 
         private void SidebarControl_Loaded(object sender, RoutedEventArgs e)

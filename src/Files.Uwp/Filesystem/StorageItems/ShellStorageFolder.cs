@@ -1,5 +1,5 @@
-﻿using Files.Shared;
-using Files.Shared.Extensions;
+﻿using Files.Shared.Extensions;
+using Files.Shared.Models.Shell;
 using Files.Uwp.Helpers;
 using Newtonsoft.Json;
 using System;

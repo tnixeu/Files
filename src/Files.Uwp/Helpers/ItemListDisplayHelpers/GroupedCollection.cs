@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Files.Backend.Models;
 using Microsoft.Toolkit.Uwp;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ using Windows.UI.Xaml.Media;
 
 namespace Files.Uwp.Helpers
 {
-    public class GroupedCollection<T> : BulkConcurrentObservableCollection<T>, IGroupedCollectionHeader
+    public class GroupedCollection<T> : GroupedCollectionBase<T>, IGroupedCollectionHeader, IGroupedCollection<T>
     {
-        public GroupedHeaderViewModel Model { get; set; }
+        public IGroupedHeader Model { get; set; }
 
         public GroupedCollection(IEnumerable<T> items) : base(items)
         {
@@ -49,49 +50,9 @@ namespace Files.Uwp.Helpers
                 Model.CountText = string.Format(Count > 1 ? "GroupItemsCount_Plural".GetLocalized() : "GroupItemsCount_Singular".GetLocalized(), Count);
             }
         }
-
-        public void InitializeExtendedGroupHeaderInfoAsync()
-        {
-            if (GetExtendedGroupHeaderInfo is null)
-            {
-                return;
-            }
-
-            Model.ResumePropertyChangedNotifications(false);
-
-            GetExtendedGroupHeaderInfo.Invoke(this);
-            Model.Initialized = true;
-            if (isBulkOperationStarted)
-            {
-                Model.PausePropertyChangedNotifications();
-            }
-        }
-
-        public override void BeginBulkOperation()
-        {
-            base.BeginBulkOperation();
-            Model.PausePropertyChangedNotifications();
-        }
-
-        public override void EndBulkOperation()
-        {
-            base.EndBulkOperation();
-            Model.ResumePropertyChangedNotifications();
-        }
     }
 
-    /// <summary>
-    /// This interface is used to allow using x:Bind for the group header template.
-    /// <br/>
-    /// This is needed because x:Bind does not work with generic types, however it does work with interfaces.
-    /// that are implemented by generic types.
-    /// </summary>
-    public interface IGroupedCollectionHeader
-    {
-        public GroupedHeaderViewModel Model { get; set; }
-    }
-
-    public class GroupedHeaderViewModel : ObservableObject
+    public class GroupedHeaderViewModel : ObservableObject, IGroupedHeader
     {
         public string Key { get; set; }
         public bool Initialized { get; set; }

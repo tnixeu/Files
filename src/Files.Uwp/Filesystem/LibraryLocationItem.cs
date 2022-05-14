@@ -1,4 +1,6 @@
-﻿using Files.Shared;
+﻿using Files.Backend.Enums;
+using Files.Backend.Models;
+using Files.Shared.Models.Shell;
 using Files.Uwp.DataModels.NavigationControlItems;
 using Files.Uwp.Helpers;
 using System.Collections.ObjectModel;

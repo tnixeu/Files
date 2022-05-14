@@ -1,4 +1,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Files.Backend.DataModels.NavigationControlItems;
+using Files.Backend.Enums;
+using Files.Backend.Models;
 using Files.Shared;
 using Files.Uwp.DataModels.NavigationControlItems;
 using Files.Uwp.Filesystem.Cloud;

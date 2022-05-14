@@ -1,5 +1,5 @@
 ﻿using Files.Backend.Enums;
-using Files.Shared;
+using Files.Shared.Models.Shell;
 
 #nullable enable
 

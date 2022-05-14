@@ -1,6 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using Files.Backend.DataModels.NavigationControlItems;
+using Files.Backend.Enums;
+using Files.Backend.Helpers;
+using Files.Backend.Models;
+using Files.Backend.Services;
 using Files.Backend.Services.Settings;
 using Files.Shared.EventArguments;
 using Files.Shared.Extensions;
@@ -13,19 +18,28 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.ApplicationModel.Core;
+using Windows.Storage;
+using Windows.Storage.AccessCache;
 using Windows.System;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace Files.Uwp.ViewModels
 {
     public class SidebarViewModel : ObservableObject, IDisposable
     {
         private IUserSettingsService UserSettingsService { get; } = Ioc.Default.GetService<IUserSettingsService>();
+        private IPinnedItemsService pinnedItemsService = Ioc.Default.GetService<IPinnedItemsService>();
+
         public ICommand EmptyRecycleBinCommand { get; private set; }
+        private SemaphoreSlim addSyncSemaphore;
 
         private IPaneHolder paneHolder;
 
@@ -57,6 +71,18 @@ namespace Files.Uwp.ViewModels
                 }
             }
         }
+
+        public IReadOnlyList<INavigationControlItem> Favorites
+        {
+            get
+            {
+                lock (favoriteList)
+                {
+                    return favoriteList.ToList().AsReadOnly();
+                }
+            }
+        }
+        private List<INavigationControlItem> favoriteList = new List<INavigationControlItem>();
 
         public bool IsSidebarCompactSize => SidebarDisplayMode == NavigationViewDisplayMode.Compact || SidebarDisplayMode == NavigationViewDisplayMode.Minimal;
 
@@ -223,42 +249,48 @@ namespace Files.Uwp.ViewModels
         public SidebarViewModel()
         {
             dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+            addSyncSemaphore = new SemaphoreSlim(1, 1);
 
             SideBarItems = new BulkConcurrentObservableCollection<INavigationControlItem>();
             EmptyRecycleBinCommand = new RelayCommand<RoutedEventArgs>(EmptyRecycleBin);
             UserSettingsService.OnSettingChangedEvent += UserSettingsService_OnSettingChangedEvent;
 
-            Manager_DataChanged(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            Manager_DataChanged(SectionType.Library, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            Manager_DataChanged(SectionType.Drives, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            Manager_DataChanged(SectionType.CloudDrives, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            Manager_DataChanged(SectionType.Network, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            Manager_DataChanged(SectionType.WSL, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            Manager_DataChanged(SectionType.FileTag, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            InitializeData();
 
-            App.SidebarPinnedController.DataChanged += Manager_DataChanged;
-            App.LibraryManager.DataChanged += Manager_DataChanged;
-            App.DrivesManager.DataChanged += Manager_DataChanged;
-            App.CloudDrivesManager.DataChanged += Manager_DataChanged;
-            App.NetworkDrivesManager.DataChanged += Manager_DataChanged;
-            App.WSLDistroManager.DataChanged += Manager_DataChanged;
-            App.FileTagsManager.DataChanged += Manager_DataChanged;
+            App.LibraryManager.DataChanged += async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.DrivesManager.DataChanged += async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.CloudDrivesManager.DataChanged += async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.NetworkDrivesManager.DataChanged += async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.WSLDistroManager.DataChanged += async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.FileTagsManager.DataChanged += async (x, y) => await DataChangedAsync((SectionType)x, y);
         }
 
-        private async void Manager_DataChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private async void InitializeData()
+        {
+            await AddPinnedItemsToSidebarAsync();
+            //await DataChangedAsync(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            await DataChangedAsync(SectionType.Library, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            await DataChangedAsync(SectionType.Drives, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            await DataChangedAsync(SectionType.CloudDrives, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            await DataChangedAsync(SectionType.Network, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            await DataChangedAsync(SectionType.WSL, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            await DataChangedAsync(SectionType.FileTag, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
+        private async Task DataChangedAsync(SectionType sender, NotifyCollectionChangedEventArgs e)
         {
             await dispatcherQueue.EnqueueAsync(async () =>
             {
-                var section = await GetOrCreateSection((SectionType)sender);
-                Func<IReadOnlyList<INavigationControlItem>> getElements = () => (SectionType)sender switch
+                var section = await GetOrCreateSectionAsync(sender);
+                Func<IReadOnlyList<INavigationControlItem>> getElements = () => sender switch
                 {
-                    SectionType.Favorites => App.SidebarPinnedController.Model.Favorites,
-                    SectionType.CloudDrives => App.CloudDrivesManager.Drives,
-                    SectionType.Drives => App.DrivesManager.Drives,
-                    SectionType.Network => App.NetworkDrivesManager.Drives,
-                    SectionType.WSL => App.WSLDistroManager.Distros,
-                    SectionType.Library => App.LibraryManager.Libraries,
-                    SectionType.FileTag => App.FileTagsManager.FileTags,
+                    SectionType.Favorites => favoriteList,
+                    SectionType.CloudDrives => App.CloudDrivesManager.Drives.Cast<INavigationControlItem>().ToList(),
+                    SectionType.Drives => App.DrivesManager.Drives.Cast<INavigationControlItem>().ToList(),
+                    SectionType.Network => App.NetworkDrivesManager.Drives.Cast<INavigationControlItem>().ToList(),
+                    SectionType.WSL => App.WSLDistroManager.Distros.Cast<INavigationControlItem>().ToList(),
+                    SectionType.Library => App.LibraryManager.Libraries.Cast<INavigationControlItem>().ToList(),
+                    SectionType.FileTag => App.FileTagsManager.FileTags.Cast<INavigationControlItem>().ToList(),
                     _ => null
                 };
                 await SyncSidebarItems(section, getElements, e);
@@ -355,7 +387,7 @@ namespace Files.Uwp.ViewModels
             }
         }
 
-        private async Task<LocationItem> GetOrCreateSection(SectionType sectionType)
+        private async Task<LocationItem> GetOrCreateSectionAsync(SectionType sectionType)
         {
             var sectionOrder = new[] { SectionType.Favorites, SectionType.Library, SectionType.Drives, SectionType.CloudDrives, SectionType.Network, SectionType.WSL, SectionType.FileTag };
             switch (sectionType)
@@ -541,10 +573,10 @@ namespace Files.Uwp.ViewModels
                     SectionType.WSL when appearanceSettingsService.ShowWslSection => App.WSLDistroManager.UpdateDrivesAsync,
                     SectionType.FileTag when appearanceSettingsService.ShowFileTagsSection => App.FileTagsManager.UpdateFileTagsAsync,
                     SectionType.Library => App.LibraryManager.UpdateLibrariesAsync,
-                    SectionType.Favorites => App.SidebarPinnedController.Model.AddAllItemsToSidebar,
+                    SectionType.Favorites => AddPinnedItemsToSidebarAsync,
                     _ => () => Task.CompletedTask
                 };
-                Manager_DataChanged(sectionType, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                await DataChangedAsync(sectionType, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                 await action();
             }
             else
@@ -605,17 +637,235 @@ namespace Files.Uwp.ViewModels
             }
         }
 
+        private async Task AddLocationItemToSidebarAsync(LocationItem locationItem)
+        {
+            int insertIndex = -1;
+            lock (favoriteList)
+            {
+                if (favoriteList.Any(x => x.Path == locationItem.Path))
+                {
+                    return;
+                }
+                var lastItem = favoriteList.LastOrDefault(x => x.ItemType == NavigationControlItemType.Location && !string.IsNullOrWhiteSpace(x.Path) && !x.Path.Equals(CommonPaths.RecycleBinPath));
+                insertIndex = lastItem != null ? favoriteList.IndexOf(lastItem) + 1 : 0;
+                favoriteList.Insert(insertIndex, locationItem);
+            }
+            await DataChangedAsync(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, locationItem, insertIndex));
+        }
+
+        public async Task AddPinnedItemsToSidebarAsync()
+        {
+            if (!UserSettingsService.AppearanceSettingsService.ShowFavoritesSection)
+            {
+                return;
+            }
+
+            favoriteList.Clear();
+
+            var homeSection = new LocationItem()
+            {
+                Text = "Home".GetLocalized(),
+                Section = SectionType.Home,
+                MenuOptions = new ContextMenuOptions
+                {
+                    IsLocationItem = true
+                },
+                Font = App.MainViewModel.FontName,
+                IsDefaultLocation = true,
+                Icon = await CoreApplication.MainView.DispatcherQueue.EnqueueAsync(() => new BitmapImage(new Uri("ms-appx:///Assets/FluentIcons/Home.png"))),
+                Path = "Home".GetLocalized()
+            };
+            await AddLocationItemToSidebarAsync(homeSection);
+
+            foreach (LocationItem li in await pinnedItemsService.GetPinnedItemsAsync())
+            {
+                await AddLocationItemToSidebarAsync(li);
+            }
+
+            await ShowHideRecycleBinItemAsync(UserSettingsService.AppearanceSettingsService.PinRecycleBinToSidebar);
+        }
+
+        public async Task AddItemAsync(LocationItem item)
+        {
+            // add to `FavoriteItems` and `favoritesList` must be atomic
+            await addSyncSemaphore.WaitAsync();
+
+            try
+            {
+                if (item is not null && !string.IsNullOrEmpty(item.Path) && !Favorites.Contains(item))
+                {
+                    await pinnedItemsService.AddPinnedItemAsync(item);
+                    //await AddLocationItemToSidebarAsync(item);
+                }
+            }
+            finally
+            {
+                addSyncSemaphore.Release();
+            }
+        }
+
+        public async Task AddItemAsync(string path)
+        {
+            // add to `FavoriteItems` and `favoritesList` must be atomic
+            await addSyncSemaphore.WaitAsync();
+
+            try
+            {
+                if (!string.IsNullOrEmpty(path) && !Favorites.Any(x => x.Path.Equals(path)))
+                {
+                    await pinnedItemsService.AddPinnedItemByPathAsync(path);
+                    //await AddLocationItemToSidebarAsync(item);
+                }
+            }
+            finally
+            {
+                addSyncSemaphore.Release();
+            }
+        }
+
+        public async Task ShowHideRecycleBinItemAsync(bool show)
+        {
+            if (show)
+            {
+                var recycleBinItem = new LocationItem
+                {
+                    Text = ApplicationData.Current.LocalSettings.Values.Get("RecycleBin_Title", "Recycle Bin"),
+                    IsDefaultLocation = true,
+                    MenuOptions = new ContextMenuOptions
+                    {
+                        IsLocationItem = true,
+                        ShowUnpinItem = true,
+                        ShowShellItems = true,
+                        ShowEmptyRecycleBin = true
+                    },
+                    Icon = await CoreApplication.MainView.DispatcherQueue.EnqueueAsync(() => UIHelpers.GetIconResource(Constants.ImageRes.RecycleBin)),
+                    Path = CommonPaths.RecycleBinPath
+                };
+                // Add recycle bin to sidebar, title is read from LocalSettings (provided by the fulltrust process)
+                // TODO: the very first time the app is launched localized name not available
+                lock (favoriteList)
+                {
+                    if (favoriteList.Any(x => x.Path == CommonPaths.RecycleBinPath))
+                    {
+                        return;
+                    }
+                    favoriteList.Add(recycleBinItem);
+                }
+                await DataChangedAsync(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, recycleBinItem));
+            }
+            else
+            {
+                foreach (INavigationControlItem item in Favorites)
+                {
+                    if (item is LocationItem && item.Path == CommonPaths.RecycleBinPath)
+                    {
+                        lock (favoriteList)
+                        {
+                            favoriteList.Remove(item);
+                        }
+                        await DataChangedAsync(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+                    }
+                }
+            }
+        }
+
+        public async Task RemoveItemAsync(LocationItem item)
+        {
+            await pinnedItemsService.RemovePinnedItemAsync(item);
+            await DataChangedAsync(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove));
+        }
+
+        public async Task<bool> MoveItemAsync(LocationItem locationItem, int oldIndex, int newIndex)
+        {
+            if (locationItem == null)
+            {
+                return false;
+            }
+
+            if (oldIndex > 0 && newIndex > 0 && newIndex <= Favorites.Count)
+            {
+                // A backup of the items, because the swapping of items requires removing and inserting them in the correct position
+                var sidebarItemsBackup = new List<INavigationControlItem>(Favorites);
+
+                try
+                {
+                    pinnedItemsService.RemovePinnedItemAt(oldIndex - 1);
+                    await pinnedItemsService.AddPinnedItemAsync(locationItem, newIndex - 1);
+                    lock (favoriteList)
+                    {
+                        favoriteList.RemoveAt(oldIndex);
+                        favoriteList.Insert(newIndex, locationItem);
+                    }
+                    await DataChangedAsync(SectionType.Favorites, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, locationItem, newIndex, oldIndex));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"An error occurred while moving pinned items in the Favorites sidebar section. {ex.Message}");
+                    favoriteList = sidebarItemsBackup;
+                    await AddPinnedItemsToSidebarAsync();
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Swaps two location items in the navigation sidebar
+        /// </summary>
+        /// <param name="firstLocationItem">The first location item</param>
+        /// <param name="secondLocationItem">The second location item</param>
+        public async Task SwapItemsAsync(LocationItem firstLocationItem, INavigationControlItem secondLocationItem)
+        {
+            if (firstLocationItem == null || secondLocationItem == null)
+            {
+                return;
+            }
+
+            var indexOfFirstItemInMainPage = IndexOfItem(firstLocationItem);
+            var indexOfSecondItemInMainPage = IndexOfItem(secondLocationItem);
+
+            // Moves the items in the MainPage
+            await MoveItemAsync(firstLocationItem, indexOfFirstItemInMainPage, indexOfSecondItemInMainPage);
+        }
+
+        /// <summary>
+        /// Returns the index of the location item in the navigation sidebar
+        /// </summary>
+        /// <param name="locationItem">The location item</param>
+        /// <returns>Index of the item</returns>
+        public int IndexOfItem(INavigationControlItem locationItem)
+        {
+            lock (favoriteList)
+            {
+                return favoriteList.FindIndex(x => x.Path == locationItem.Path);
+            }
+        }
+
+        /// <summary>
+        /// Returns the index of the location item in the collection containing Navigation control items
+        /// </summary>
+        /// <param name="locationItem">The location item</param>
+        /// <param name="collection">The collection in which to find the location item</param>
+        /// <returns>Index of the item</returns>
+        public int IndexOfItem(INavigationControlItem locationItem, List<INavigationControlItem> collection)
+        {
+            return collection.IndexOf(locationItem);
+        }
+
+
         public void Dispose()
         {
             UserSettingsService.OnSettingChangedEvent -= UserSettingsService_OnSettingChangedEvent;
 
-            App.SidebarPinnedController.DataChanged -= Manager_DataChanged;
-            App.LibraryManager.DataChanged -= Manager_DataChanged;
-            App.DrivesManager.DataChanged -= Manager_DataChanged;
-            App.CloudDrivesManager.DataChanged -= Manager_DataChanged;
-            App.NetworkDrivesManager.DataChanged -= Manager_DataChanged;
-            App.WSLDistroManager.DataChanged -= Manager_DataChanged;
-            App.FileTagsManager.DataChanged -= Manager_DataChanged;
+            App.LibraryManager.DataChanged -= async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.DrivesManager.DataChanged -= async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.CloudDrivesManager.DataChanged -= async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.NetworkDrivesManager.DataChanged -= async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.WSLDistroManager.DataChanged -= async (x, y) => await DataChangedAsync((SectionType)x, y);
+            App.FileTagsManager.DataChanged -= async (x, y) => await DataChangedAsync((SectionType)x, y);
         }
 
         public void SidebarControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)

@@ -167,9 +167,4 @@ namespace Files.Uwp.Helpers
             (16000, "ItemSizeText_Small".GetLocalized(), "16 KiB".ConvertSizeAbbreviation()),
         };
     }
-
-    public interface IGroupableItem
-    {
-        public string Key { get; set; }
-    }
 }

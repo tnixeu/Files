@@ -1,5 +1,4 @@
-﻿using Files.Shared;
-using Files.Uwp.Dialogs;
+﻿using Files.Uwp.Dialogs;
 using Files.Shared.Enums;
 using Files.Shared.Extensions;
 using Files.Uwp.Filesystem;
@@ -19,6 +18,7 @@ using Windows.Foundation.Collections;
 using Windows.Storage;
 using Files.Backend.Enums;
 using Windows.System;
+using Files.Shared.Models.Shell;
 
 namespace Files.Uwp.Helpers
 {
