@@ -3561,6 +3561,30 @@ Koristimo App Center za praćenje korištenja aplikacija, pronalaženje grešaka
           <source>Contributors</source>
           <target state="new">Contributors</target>
         </trans-unit>
+        <trans-unit id="Adaptive" translate="yes" xml:space="preserve">
+          <source>Adaptive</source>
+          <target state="new">Adaptive</target>
+        </trans-unit>
+        <trans-unit id="AdaptiveShortcutTooltip" translate="yes" xml:space="preserve">
+          <source>Adaptive (Ctrl+Shift+7)</source>
+          <target state="new">Adaptive (Ctrl+Shift+7)</target>
+        </trans-unit>
+        <trans-unit id="BaseLayoutContextFlyoutAdaptive.KeyboardAcceleratorTextOverride" translate="yes" xml:space="preserve">
+          <source>Ctrl+Shift+7</source>
+          <target state="new">Ctrl+Shift+7</target>
+        </trans-unit>
+        <trans-unit id="ShowAlternateStreams" translate="yes" xml:space="preserve">
+          <source>Show Alternate Data Streams</source>
+          <target state="new">Show Alternate Data Streams</target>
+        </trans-unit>
+        <trans-unit id="ReviewFiles" translate="yes" xml:space="preserve">
+          <source>Review Files</source>
+          <target state="new">Review Files</target>
+        </trans-unit>
+        <trans-unit id="ReviewFilesContent" translate="yes" xml:space="preserve">
+          <source>Would you like to review Files?</source>
+          <target state="new">Would you like to review Files?</target>
+        </trans-unit>
       </group>
     </body>
   </file>
