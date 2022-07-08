@@ -715,6 +715,11 @@ namespace Files.Uwp.Views
                         SlimContentPage?.CommandsViewModel.CopyPathOfSelectedItemCommand.Execute(null);
                         break;
                     }
+                case (true, false, true, true, VirtualKey.C):
+                    {
+                        SlimContentPage?.CommandsViewModel.CopyPathForwardOfSelectedItemCommand.Execute(null);
+                        break;
+                    }
 
                 case (false, false, false, _, VirtualKey.F3): //f3
                 case (true, false, false, _, VirtualKey.F): // ctrl + f

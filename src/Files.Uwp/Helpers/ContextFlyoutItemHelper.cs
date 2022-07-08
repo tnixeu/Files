@@ -818,6 +818,21 @@ namespace Files.Uwp.Helpers
                     ShowInFtpPage = true,
                     ShowInZipPage = true,
                 },
+
+                 new ContextMenuFlyoutItemViewModel()
+                {
+                    Text = "CopyLocationForward".GetLocalized(),
+                    ColoredIcon = new ColoredIconModel()
+                    {
+                        BaseLayerGlyph = "\uF02F",
+                        OverlayLayerGlyph = "\uF030"
+                    },
+                    Command = commandsViewModel.CopyPathForwardOfSelectedItemCommand,
+                    SingleItemOnly = true,
+                    ShowInSearchPage = true,
+                    ShowInFtpPage = true,
+                    ShowInZipPage = true,
+                },
                 new ContextMenuFlyoutItemViewModel()
                 {
                     Text = "BaseLayoutContextFlyoutPaste/Text".GetLocalized(),

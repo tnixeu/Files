@@ -135,6 +135,9 @@
   <data name="CopyLocation" xml:space="preserve">
     <value>Copy Location</value>
   </data>
+  <data name="CopyLocationForward" xml:space="preserve">
+    <value>Copy Location (/)</value>
+  </data>
   <data name="NavigationToolbarPaste.Label" xml:space="preserve">
     <value>Paste</value>
   </data>

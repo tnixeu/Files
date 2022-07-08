@@ -358,6 +358,26 @@ namespace Files.Uwp.Interacts
             }
         }
 
+        public virtual void CopyPathForwardOfSelectedItem(RoutedEventArgs e)
+        {
+            try
+            {
+                if (SlimContentPage != null)
+                {
+                    var path = SlimContentPage.SelectedItem != null ? SlimContentPage.SelectedItem.ItemPath : associatedInstance.FilesystemViewModel.WorkingDirectory;
+                    path = path.Replace("\\", "/", StringComparison.Ordinal);        
+                    DataPackage data = new();
+                    data.SetText(path);
+                    Clipboard.SetContent(data);
+                    Clipboard.Flush();
+                }
+            }
+            catch (Exception)
+            {
+                Debugger.Break();
+            }
+        }
+
         public virtual async void OpenDirectoryInDefaultTerminal(RoutedEventArgs e)
         {
             await NavigationHelpers.OpenDirectoryInTerminal(associatedInstance.FilesystemViewModel.WorkingDirectory);

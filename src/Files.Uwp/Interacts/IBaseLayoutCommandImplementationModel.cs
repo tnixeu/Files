@@ -64,6 +64,8 @@ namespace Files.Uwp.Interacts
 
         void CopyPathOfSelectedItem(RoutedEventArgs e);
 
+        void CopyPathForwardOfSelectedItem(RoutedEventArgs e);
+
         void OpenDirectoryInDefaultTerminal(RoutedEventArgs e);
 
         void ShareItem(RoutedEventArgs e);
